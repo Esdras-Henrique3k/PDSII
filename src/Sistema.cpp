@@ -1,11 +1,12 @@
 #include <iostream>
+#include <regex>
 #include "Sistema.hpp"
 #include "Usuario.hpp"
 #include "Operacoes.hpp"
 #include "Relatorio.hpp"
 #include "Estatistica.hpp"
 #include "Configuracao.hpp"
-#include <limits>
+#include "Utils.hpp"
 
 void Sistema::iniciar() {
     while (true) {
@@ -14,47 +15,58 @@ void Sistema::iniciar() {
 }
 
 void Sistema::exibirMenuPrincipal() {
-     while(true){
-        std::cout << "--- Bem-vindo ao Sistema de Controle Financeiro ---\n";
+    while (true) {
+        std::cout << "\n--- Bem-vindo ao Sistema de Controle Financeiro ---\n";
         std::cout << "1. Criar usuário\n2. Fazer login\n3. Sair\nEscolha uma opção: ";
-        
+
         int opcao;
         std::cin >> opcao;
-         if (std::cin.fail())
-         {
-             std::cin.clear();
-             std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-             std::cout << "Entrada inválida! Por favor, insira um número." << std::endl;
-             continue;
-         }
+
+        // Verifica se a entrada falhou
+        if (std::cin.fail()) {
+            limparEntrada(); // Limpa a entrada
+            std::cout << "Opção inválida! Tente novamente.\n";
+            continue;
+        }
+
         std::cin.ignore();
+
         if (opcao == 1) {
             criarUsuario();
-            // break;
         } else if (opcao == 2) {
             fazerLogin();
-            // break;
         } else if (opcao == 3) {
             std::cout << "Saindo... Até mais!\n";
-            exit(0); // Saída do programa
+            exit(0);
         } else {
-            std::cout << "Opção inválida!\n";
+            std::cout << "Opção inválida! Tente novamente.\n";
         }
-     }
+    }
 }
 
 void Sistema::criarUsuario() {
     std::string nome, senha, salario;
 
-    // Solicitar nome, senha e salário
     std::cout << "Digite o nome do novo usuário: ";
     std::getline(std::cin, nome);
+
+    // Validação do nome
+    while (!validarNome(nome)) {
+        std::cout << "Nome inválido! Use apenas letras e espaços. Digite novamente: ";
+        std::getline(std::cin, nome);
+    }
 
     std::cout << "Digite a senha: ";
     std::getline(std::cin, senha);
 
     std::cout << "Digite seu salário mensal em reais: ";
     std::getline(std::cin, salario);
+
+    // Validação do salário
+    while (!validarSalario(salario)) {
+        std::cout << "Salário inválido! Use apenas números. Digite novamente: ";
+        std::getline(std::cin, salario);
+    }
 
     // Carregar os usuários existentes
     std::vector<std::string> usuarios = Usuario::carregarUsuarios("data/usuarios.txt");
@@ -73,7 +85,6 @@ void Sistema::criarUsuario() {
     }
 }
 
-
 void Sistema::fazerLogin() {
     std::string nome, senha;
 
@@ -90,7 +101,7 @@ void Sistema::fazerLogin() {
         std::cout << "Bem-vindo, " << nome << "!\n";
         std::cout << "Salário Mensal: R$ " << salario << "\n";
 
-        // **Armazena o nome e o salário do usuário logado**
+        // Armazena o nome e o salário do usuário logado
         this->usuarioLogado = nome;
         this->salarioUsuario = salario; 
 
@@ -110,12 +121,17 @@ void Sistema::fazerLogin() {
     }
 }
 
-
-
 void Sistema::menuCompras(Operacoes& operacoes) {
     while (true) {
-        std::cout << "\n--- Menu de Compras ---\n"
-                  << "1. Adicionar compra\n"
+        double salarioDouble = std::stod(salarioUsuario); // Converte string para double
+        double gastosMensais = operacoes.calcularGastosMensais();
+        double saldoDisponivel = salarioDouble - gastosMensais;
+        operacoes.atualizarSaldo(saldoDisponivel); 
+
+        std::cout << "\n--- Menu de Compras ---\n";
+        std::cout << "Salário Mensal: R$ " << salarioUsuario << "\n";
+        std::cout << "Saldo Disponível: R$ " << saldoDisponivel << "\n";
+        std::cout << "1. Adicionar compra\n"
                   << "2. Listar compras\n"
                   << "3. Gerar relatório\n"
                   << "4. Ver estatísticas\n"
@@ -127,8 +143,14 @@ void Sistema::menuCompras(Operacoes& operacoes) {
         std::cin >> escolha;
         std::cin.ignore();  // Limpa o buffer de entrada
 
+        if (std::cin.fail()) {
+            limparEntrada();  // Limpa o erro de entrada
+            std::cout << "Opção inválida! Tente novamente.\n";
+            continue;
+        }
+
         if (escolha == 1) {
-            operacoes.adicionarCompra();
+            operacoes.adicionarCompra(std::stod(salarioUsuario));
         } else if (escolha == 2) {
             operacoes.listarCompras();
         } else if (escolha == 3) {
@@ -151,11 +173,18 @@ void Sistema::menuCompras(Operacoes& operacoes) {
                 std::cin >> opcao;
                 std::cin.ignore();
 
+                if (std::cin.fail()) {
+                    limparEntrada();  // Limpa o erro de entrada
+                    std::cout << "Opção inválida! Tente novamente.\n";
+                    continue;
+                }
+
                 if (opcao == 1) {
                     std::string novoNome;
                     std::cout << "Digite o novo nome: ";
                     std::getline(std::cin, novoNome);
                     configuracao.alterarNome(novoNome);
+                    operacoes.setUsuario(novoNome);
                 } else if (opcao == 2) {
                     std::string novaSenha;
                     std::cout << "Digite a nova senha: ";
@@ -177,19 +206,24 @@ void Sistema::menuCompras(Operacoes& operacoes) {
                 }
             }
         } else if (escolha == 7) {
-            break;  // Logout
+            break; 
         } else {
             std::cout << "Opção inválida!" << std::endl;
         }
     }
 }
 
-
 void Sistema::gerarRelatorio(Operacoes& operacoes) {
     std::cout << "Deseja gerar um relatório mensal ou anual? (1 para mensal, 2 para anual, 0 para não gerar): ";
     int relatorioEscolha;
     std::cin >> relatorioEscolha;
     std::cin.ignore();
+
+    if (std::cin.fail()) {
+        limparEntrada();  // Limpa o erro de entrada
+        std::cout << "Opção inválida! Tente novamente.\n";
+        return;
+    }
 
     if (relatorioEscolha == 1) {
         int mes, ano;
@@ -224,6 +258,13 @@ void Sistema::exibirEstatisticas(Operacoes& operacoes) {
     std::cin >> periodo;
     std::cin.ignore();
 
+    if (std::cin.fail()) {
+        limparEntrada();  // Limpa o erro de entrada
+        std::cout << "Opção inválida! Tente novamente.\n";
+        return;
+        
+    }
+
     int mes = 0, ano = 0;
     if (periodo == 1) {
         std::cout << "Digite o mês (1-12): ";
@@ -252,6 +293,9 @@ void Sistema::exibirEstatisticas(Operacoes& operacoes) {
 
     // Converte o salário armazenado para float e passa para Estatistica
     float salario = std::stof(salarioUsuario);
+    if (periodo == 2) {  
+    salario *= 12;
+}
     Estatistica estatistica(comprasFiltradas, salario);
     estatistica.exibirEstatisticas();
-}
+    }
