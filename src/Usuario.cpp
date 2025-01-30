@@ -8,7 +8,7 @@ Usuario::Usuario(const std::string& nome, const std::string& senha, const std::s
 
 std::string Usuario::criarUsuario() const {
     std::ostringstream oss;
-    oss << nome << ";" << senha << ";" << salario;  // Agora o salário é salvo corretamente
+    oss << nome << ";" << senha << ";" << salario;
     return oss.str();
 }
 
@@ -38,10 +38,10 @@ bool Usuario::validarUsuario(const std::string& nome, const std::string& senha,
         std::string nomeArquivo, senhaArquivo, salarioArquivo;
         getline(ss, nomeArquivo, ';');
         getline(ss, senhaArquivo, ';');
-        getline(ss, salarioArquivo, ';');  // Pega o salário também
+        getline(ss, salarioArquivo, ';');
 
         if (nomeArquivo == nome && senhaArquivo == senha) {
-            salario = salarioArquivo;  // Define o salário para o usuário logado
+            salario = salarioArquivo;
             return true;
         }
     }
