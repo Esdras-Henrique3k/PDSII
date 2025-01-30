@@ -1,6 +1,8 @@
 #include "Operacoes.hpp"
 #include "Compra.hpp"
 #include "ParcelaCompra.hpp"
+#include "AlertaGastos.hpp"
+#include "Utils.hpp"
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -9,15 +11,24 @@
 #include <string>
 #include <limits>
 
-Operacoes::Operacoes(const std::string& nomeUsuario) : nomeUsuario(nomeUsuario), categoria(nomeUsuario) {} 
+Operacoes::Operacoes(const std::string& nomeUsuario)
+    : nomeUsuario(nomeUsuario), categoria(nomeUsuario), saldoDisponivel(0.0f), salarioUsuario(0.0f), diaAtual(0),
+      alertaGastos(0.0f, 0.0f, diaAtual) {
+}
+
 
 std::string Operacoes::getUsuario() const {
     return nomeUsuario;
 }
 
+void Operacoes::setUsuario(const std::string& novoNome) {
+    nomeUsuario = novoNome;
+}
+
+
 void Operacoes::addCompra(const Compra& compra) {
     compras.push_back(compra);
-    salvarCompras(); // Salva as compras no arquivo após adicionar
+    salvarCompras();
 }
 
 bool compararPorData(const Compra& a, const Compra& b) {
@@ -93,17 +104,7 @@ void Operacoes::carregarCompras() {
 void Operacoes::salvarCompras() {
     std::ofstream arquivo("data/compras-" + nomeUsuario + ".txt");
     for (const auto& compra : compras) {
-        // Verifica se a compra é uma compra parcelada
-         if (auto parcelaCompra = dynamic_cast<const ParcelaCompra*>(&compra)) {
-             // Compra parcelada
-             arquivo << compra.getValor() << ";" << compra.getCategoria() << ";" << compra.getData() << std::endl;
-             for (int i = 0; i < parcelaCompra->getNumParcelas(); ++i) {
-                 arquivo << parcelaCompra->getValorParcela(i) << ";" << compra.getCategoria() << ";" << compra.getData() << std::endl;
-             }
-         } else {
-             // Compra à vista
             arquivo << compra.getValor() << ";" << compra.getCategoria() << ";" << compra.getData() << std::endl;
-         }
     }
 }
 
@@ -111,8 +112,6 @@ void Operacoes::menuCompras() {
     while (true) {
         std::cout << "\n--- Menu de Compras ---\n1. Adicionar compra\n2. Listar compras\n3. Logout\nEscolha uma opção: ";
         int escolha;
-        std::cin >> escolha;
-        
         std::cin >> escolha;
 
         if (std::cin.fail()) {
@@ -123,7 +122,7 @@ void Operacoes::menuCompras() {
         }
 
         if (escolha == 1) {
-            adicionarCompra();
+            adicionarCompra(salarioUsuario);
         } else if (escolha == 2) {
             listarCompras();
         } else if (escolha == 3) {
@@ -134,7 +133,7 @@ void Operacoes::menuCompras() {
     }
 }
 
-void Operacoes::adicionarCompra() {
+void Operacoes::adicionarCompra(double salario) {
     float valor;
     std::string categoriaEscolhida;
 
@@ -148,7 +147,7 @@ void Operacoes::adicionarCompra() {
     }
 
     // Acessa as categorias disponíveis
-    const auto& categorias = categoria.obterCategorias(); 
+    const auto& categorias = categoria.obterCategorias();
     if (categorias.empty()) {
         std::cout << "Nenhuma categoria disponível. Adicione uma antes de continuar." << std::endl;
         return;
@@ -189,6 +188,8 @@ void Operacoes::adicionarCompra() {
         }
 
         addCompra(Compra(valor, categoriaEscolhida, data));
+        saldoDisponivel -= valor;  // Atualiza o saldo após a compra
+        atualizarSaldo(saldoDisponivel);  // Atualiza o saldo no objeto
 
         std::cout << "Compra à vista adicionada com sucesso!" << std::endl;
 
@@ -212,27 +213,31 @@ void Operacoes::adicionarCompra() {
             return;
         }
 
-        //ParcelaCompra::ParcelarCompra(valor, categoriaEscolhida, data, numParcelas, *this);
-        
-        // addCompra(parcelaCompra);
-        // Exibir os valores de cada parcela
-        // const auto& parcelas = parcelaCompra.getValoresParcelas();
-        // std::cout << "Detalhamento das parcelas:\n";
-        // for (size_t i = 0; i < parcelas.size(); ++i) {
-        //     std::cout << "Parcela " << i + 1 << ": R$ " << parcelas[i] << "\n";
-        // }
+        ParcelaCompra::ParcelarCompra(valor, categoriaEscolhida, data, numParcelas, *this);
+        saldoDisponivel -= valor;  // Atualiza o saldo após a compra
+        atualizarSaldo(saldoDisponivel);  // Atualiza o saldo no objeto
+
         std::cout << "Compra parcelada adicionada com sucesso!\n";
     } else {
         std::cout << "Opção de pagamento inválida!\n";
     }
+
+    // Atualiza o saldo no objeto Operacoes
+    atualizarSaldo(salario - calcularGastosMensais());
+
+    // Atualiza o alerta de gastos
+    alertaGastos.atualizarSaldo(saldoDisponivel); 
+    alertaGastos.atualizarSalario(salario);  
+    alertaGastos.verificarAlerta();
 }
+
 
 void Operacoes::mudarCategorias() {
     while (true) {
         std::cout << "\n--- Mudar Categorias ---\n1. Adicionar categoria\n2. Remover categoria\n3. Listar categorias\n4. Voltar\nEscolha uma opção: ";
         int escolha;
         std::cin >> escolha;
-        std::cin.ignore();
+        limparEntrada();
 
         if (escolha == 1) {
             adicionarCategoria();
@@ -253,7 +258,7 @@ void Operacoes::adicionarCategoria() {
     std::cout << "Digite o nome da nova categoria: ";
     std::getline(std::cin, novaCategoria);
 
-    categoria.adicionarCategoria(novaCategoria, nomeUsuario); // Passando nomeUsuario
+    categoria.adicionarCategoria(novaCategoria, nomeUsuario);
     std::cout << "Categoria adicionada com sucesso!" << std::endl;
 }
 
@@ -271,7 +276,7 @@ void Operacoes::removerCategoria() {
     }
 
     std::string categoriaRemover = categoria.obterCategorias()[opcao - 1];
-    categoria.excluirCategoria(categoriaRemover, nomeUsuario); // Passando nomeUsuario
+    categoria.excluirCategoria(categoriaRemover, nomeUsuario);
     std::cout << "Categoria removida com sucesso!" << std::endl;
 }
 
@@ -305,4 +310,8 @@ double Operacoes::calcularGastosMensais() {
         }
     }
     return totalGasto;
+}
+
+void Operacoes::atualizarSaldo(float novoSaldo) {
+    saldoDisponivel = novoSaldo;
 }
