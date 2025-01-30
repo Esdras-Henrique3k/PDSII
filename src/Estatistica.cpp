@@ -1,7 +1,7 @@
 #include "Estatistica.hpp"
 #include <iostream>
 #include <iomanip>
-#include "Sistema.hpp"        // Inclua o cabeçalho da classe Sistema
+#include "Sistema.hpp"
 #include "Operacoes.hpp"
 
 Estatistica::Estatistica(const std::vector<Compra>& compras, float salario) 
