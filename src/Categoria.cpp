@@ -29,14 +29,12 @@ void Categoria::adicionarCategoria(const std::string& categoria, const std::stri
 }
 
 void Categoria::excluirCategoria(const std::string& categoria, const std::string& nomeUsuario) {
-    // Não permite excluir categorias padrão
-    if (std::find(categorias.begin(), categorias.end(), categoria) != categorias.end() &&
-        std::find(categorias.begin(), categorias.begin() + 6, categoria) == categorias.begin() + 6) {
-        auto it = std::find(categorias.begin(), categorias.end(), categoria);
+    auto it = std::find(categorias.begin(), categorias.end(), categoria);
+    if (it != categorias.end()) {
         categorias.erase(it);  // Remove categoria
         salvarCategorias(nomeUsuario);  // Salva após remover uma categoria
     } else {
-        std::cout << "Não é possível excluir categorias padrão!" << std::endl;
+        std::cout << "Categoria não encontrada!" << std::endl;
     }
 }
 
