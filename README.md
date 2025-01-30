@@ -40,7 +40,7 @@ Para compilar e executar o programa, siga os passos abaixo:
 2. **Abra um terminal e navegue até o diretório do programa:**
 
    ```bash
-   cd <PDSII>>
+   cd <PDSII>
    ```
 
 3. **Para limpar os arquivos compilados, utilize:**
