@@ -1,3 +1,11 @@
+# Definindo o compilador e as flags
+CXX = g++
+CXXFLAGS = -Wall -Wextra -g3 -I./include
+LDFLAGS = -mconsole
+
+# Diretórios
+SRCDIR = src
+INCDIR = include
 OBJDIR = obj
 BINDIR = bin
 
