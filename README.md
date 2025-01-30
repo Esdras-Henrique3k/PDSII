@@ -58,7 +58,7 @@ Para compilar e executar o programa, siga os passos abaixo:
 5. **Execute o programa:**
 
    ```bash
-   make
+   make run
    ```
 
 ---
