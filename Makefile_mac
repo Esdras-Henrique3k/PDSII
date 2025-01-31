@@ -1,9 +1,11 @@
-# Definições do compilador
+# Definindo o compilador e as flags
 CXX = g++
 CXXFLAGS = -Wall -Wextra -g3 -I./include -std=c++17
+LDFLAGS =
 
 # Diretórios
 SRCDIR = src
+INCDIR = include
 OBJDIR = obj
 BINDIR = bin
 
@@ -12,23 +14,23 @@ SOURCES = $(wildcard $(SRCDIR)/*.cpp)
 OBJECTS = $(SOURCES:$(SRCDIR)/%.cpp=$(OBJDIR)/%.o)
 EXEC = $(BINDIR)/sistema_controle_financeiro
 
-# Compilar tudo
+# Regra padrão (apenas compila)
 all: $(EXEC)
 
-# Gerar executável
+# Como gerar o executável a partir dos objetos
 $(EXEC): $(OBJECTS)
-	$(CXX) $(OBJECTS) -o $(EXEC)
+	$(CXX) $(OBJECTS) $(LDFLAGS) -o $(EXEC)
 
-# Gerar arquivos .o
+# Como compilar arquivos .cpp em .o
 $(OBJDIR)/%.o: $(SRCDIR)/%.cpp
 	@mkdir -p $(OBJDIR)
 	$(CXX) $(CXXFLAGS) -c $< -o $(OBJDIR)/$(@F)
 
-# Limpeza
+# Limpeza dos arquivos objetos e executável (mas mantendo o diretório bin)
 clean:
 	rm -f $(OBJDIR)/*.o $(EXEC)
 
-# Rodar o programa
+# Regra para rodar o programa após a compilação
 run: $(EXEC)
 	@echo "Executando o programa..."
 	@./$(EXEC)

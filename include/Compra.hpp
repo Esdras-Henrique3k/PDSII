@@ -7,17 +7,17 @@
 
 class Compra {
 private:
-    float valor;
+    double valor;
     std::string categoria;
     std::string data;
 
 public:
-    Compra(float valor, const std::string& categoria, const std::string& data);
+    Compra(double valor, const std::string& categoria, const std::string& data);
 
     // Adicione um destrutor virtual
     virtual ~Compra() = default;
 
-    float getValor() const;
+    double getValor() const;
     std::string getCategoria() const;
     std::string getData() const;
 

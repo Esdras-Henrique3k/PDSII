@@ -1,6 +1,7 @@
 #include <iostream>
 #include <regex>
 #include "Sistema.hpp"
+#include "TxtToExcelExporter.hpp"
 #include "Usuario.hpp"
 #include "Operacoes.hpp"
 #include "Relatorio.hpp"
@@ -137,7 +138,8 @@ void Sistema::menuCompras(Operacoes& operacoes) {
                   << "4. Ver estatísticas\n"
                   << "5. Mudar categorias\n"
                   << "6. Configuração\n"
-                  << "7. Logout\n"
+                  << "7. Exportar dados para planilha\n"
+                  << "8. Logout\n"
                   << "Escolha uma opção: ";
         int escolha;
         std::cin >> escolha;
@@ -206,6 +208,20 @@ void Sistema::menuCompras(Operacoes& operacoes) {
                 }
             }
         } else if (escolha == 7) {
+            std::string outputDir;
+            
+            std::cout << "Digite o diretório absoluto onde deseja salvar o arquivo CSV: ";
+            std::getline(std::cin, outputDir);
+
+            outputDir.erase(0, outputDir.find_first_not_of(" \t"));
+            outputDir.erase(outputDir.find_last_not_of(" \t") + 1);
+
+            if (outputDir.empty()) {
+                std::cerr << "Erro: Nenhum diretório informado. Exportação cancelada." << std::endl;
+            } else {
+                TxtToExcelExporter::exportToCsv(operacoes.getUsuario(), outputDir);
+            }
+        } else if (escolha == 8) {
             break; 
         } else {
             std::cout << "Opção inválida!" << std::endl;
@@ -259,7 +275,7 @@ void Sistema::exibirEstatisticas(Operacoes& operacoes) {
     std::cin.ignore();
 
     if (std::cin.fail()) {
-        limparEntrada();  // Limpa o erro de entrada
+        limparEntrada();
         std::cout << "Opção inválida! Tente novamente.\n";
         return;
         
@@ -291,8 +307,8 @@ void Sistema::exibirEstatisticas(Operacoes& operacoes) {
         }
     }
 
-    // Converte o salário armazenado para float e passa para Estatistica
-    float salario = std::stof(salarioUsuario);
+    // Converte o salário armazenado para double e passa para Estatistica
+    double salario = std::stof(salarioUsuario);
     if (periodo == 2) {  
     salario *= 12;
 }

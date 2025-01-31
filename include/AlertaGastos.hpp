@@ -5,16 +5,16 @@
 
 class AlertaGastos {
 private:
-    float salario;
-    float saldoRestante;
+    double salario;
+    double saldoRestante;
     int diaAtual;
 
 public:
-    AlertaGastos(float salarioInicial, float saldoInicial, int dia)
+    AlertaGastos(double salarioInicial, double saldoInicial, int dia)
         : salario(salarioInicial), saldoRestante(saldoInicial), diaAtual(dia) {}
         
     void verificarAlerta() const;
-    void atualizarSaldo(float novoSaldo);
+    void atualizarSaldo(double novoSaldo);
     void atualizarSalario(double salario);
 };
 

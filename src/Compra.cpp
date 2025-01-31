@@ -1,9 +1,9 @@
 #include "Compra.hpp"
 
-Compra::Compra(float valor, const std::string& categoria, const std::string& data)
+Compra::Compra(double valor, const std::string& categoria, const std::string& data)
     : valor(valor), categoria(categoria), data(data) {}
 
-float Compra::getValor() const {
+double Compra::getValor() const {
     return valor;
 }
 

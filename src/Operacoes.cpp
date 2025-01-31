@@ -3,6 +3,8 @@
 #include "ParcelaCompra.hpp"
 #include "AlertaGastos.hpp"
 #include "Utils.hpp"
+#include "MidiaControll.hpp"
+#include "EasterEgg.hpp"
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -95,7 +97,7 @@ void Operacoes::carregarCompras() {
         std::getline(ss, categoria, ';');
         std::getline(ss, data, ';');
 
-        float valor = std::stof(valorStr);
+        double valor = std::stof(valorStr);
         Compra compra(valor, categoria, data);
         compras.push_back(compra);
     }
@@ -106,6 +108,8 @@ void Operacoes::salvarCompras() {
     for (const auto& compra : compras) {
             arquivo << compra.getValor() << ";" << compra.getCategoria() << ";" << compra.getData() << std::endl;
     }
+    MidiaControll::playAudio("midias/notiification/index");
+    
 }
 
 void Operacoes::menuCompras() {
@@ -134,7 +138,7 @@ void Operacoes::menuCompras() {
 }
 
 void Operacoes::adicionarCompra(double salario) {
-    float valor;
+    double valor;
     std::string categoriaEscolhida;
 
     std::cout << "Digite o valor da compra: ";
@@ -188,9 +192,9 @@ void Operacoes::adicionarCompra(double salario) {
         }
 
         addCompra(Compra(valor, categoriaEscolhida, data));
-        saldoDisponivel -= valor;  // Atualiza o saldo após a compra
-        atualizarSaldo(saldoDisponivel);  // Atualiza o saldo no objeto
-
+        saldoDisponivel -= valor; 
+        atualizarSaldo(saldoDisponivel);
+        EasterEgg::checkValue(valor);
         std::cout << "Compra à vista adicionada com sucesso!" << std::endl;
 
     } else if (opcaoPagamento == 2) {
@@ -214,9 +218,9 @@ void Operacoes::adicionarCompra(double salario) {
         }
 
         ParcelaCompra::ParcelarCompra(valor, categoriaEscolhida, data, numParcelas, *this);
-        saldoDisponivel -= valor;  // Atualiza o saldo após a compra
-        atualizarSaldo(saldoDisponivel);  // Atualiza o saldo no objeto
-
+        saldoDisponivel -= valor; 
+        atualizarSaldo(saldoDisponivel);
+        EasterEgg::checkValue(valor);
         std::cout << "Compra parcelada adicionada com sucesso!\n";
     } else {
         std::cout << "Opção de pagamento inválida!\n";
@@ -312,6 +316,6 @@ double Operacoes::calcularGastosMensais() {
     return totalGasto;
 }
 
-void Operacoes::atualizarSaldo(float novoSaldo) {
+void Operacoes::atualizarSaldo(double novoSaldo) {
     saldoDisponivel = novoSaldo;
 }

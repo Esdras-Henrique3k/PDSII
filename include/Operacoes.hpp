@@ -12,15 +12,15 @@ private:
     std::vector<Compra> compras; 
     std::string nomeUsuario; // Nome do usuário associado
     Categoria categoria; 
-    float saldoDisponivel;  // Saldo disponível do usuário
-    float salarioUsuario;   // Salário do usuário
+    double saldoDisponivel;  // Saldo disponível do usuário
+    double salarioUsuario;   // Salário do usuário
     int diaAtual;           // Dia atual do sistema
     AlertaGastos alertaGastos;
 
 public:
-    Operacoes(float salario, float saldo, int dia);
+    Operacoes(double salario, double saldo, int dia);
     Operacoes(const std::string& nomeUsuario);
-    Operacoes(const std::string& nomeUsuario, float salario, float saldo);
+    Operacoes(const std::string& nomeUsuario, double salario, double saldo);
     double calcularGastosMensais();
 
     void addCompra(const Compra& compra);
@@ -40,7 +40,7 @@ public:
     std::string getUsuario() const;  
     void setUsuario(const std::string& novoNome);
 
-    void atualizarSaldo(float novoSaldo);
+    void atualizarSaldo(double novoSaldo);
     void atualizarAlertaGastos(double saldo, double salario);
 };
 

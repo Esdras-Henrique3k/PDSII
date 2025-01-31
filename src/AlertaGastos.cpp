@@ -5,13 +5,13 @@ void AlertaGastos::atualizarSalario(double salario) {
     this->salario = salario;  // Atualiza o salário
 }
 
-void AlertaGastos::atualizarSaldo(float novoSaldo) {
+void AlertaGastos::atualizarSaldo(double novoSaldo) {
     this->saldoRestante = novoSaldo;  // Atualiza o saldo restante
 }
 
 void AlertaGastos::verificarAlerta() const {
     // Limites de alerta baseados no salário
-    float limiteCritico = salario * 0.1;  // Se gastar mais de 90% do salário
+    double limiteCritico = salario * 0.1;  // Se gastar mais de 90% do salário
 
 
     // Verifica o saldo e gera alertas

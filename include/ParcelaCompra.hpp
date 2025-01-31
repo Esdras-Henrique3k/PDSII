@@ -9,7 +9,7 @@
 class ParcelaCompra
 {
 public:
-    static void ParcelarCompra(float valor, const std::string& categoriaEscolhida, const std::string& data, int numParcelas, Operacoes& operacoes);
+    static void ParcelarCompra(double valor, const std::string& categoriaEscolhida, const std::string& data, int numParcelas, Operacoes& operacoes);
 };
 
 #endif

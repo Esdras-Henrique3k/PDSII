@@ -49,9 +49,9 @@ std::string addOneMonth(const std::string& date) {
 }
 
 
-void ParcelaCompra::ParcelarCompra(float valor, const std::string& categoriaEscolhida, const std::string &data, int numParcelas, Operacoes &operacoes)
+void ParcelaCompra::ParcelarCompra(double valor, const std::string& categoriaEscolhida, const std::string &data, int numParcelas, Operacoes &operacoes)
 {
-    float parcelasValue = valor / numParcelas;
+    double parcelasValue = valor / numParcelas;
     std::string parcelaData = data;
 
     for (int i = 0; i < numParcelas; i++)
